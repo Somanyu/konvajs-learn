@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Document</title>
+
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+  </head>
+  <body>
+    <div id="container"></div>
+  </body>
+
+  <script>
+    const stage = new Konva.Stage({
+      container: "container",
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+
+    const layer = new Konva.Layer();
+    stage.add(layer);
+
+    let isDrawing = false;
+    let circle;
+
+    stage.on("mousedown touchstart", (e) => {
+      isDrawing = true;
+
+      // Create a circle
+      const pos = stage.getPointerPosition();
+      circle = new Konva.Circle({
+        x: pos.x,
+        y: pos.y,
+        radius: 0,
+        fill: "red",
+        stroke: "black",
+        strokeWidth: 2,
+      });
+
+      layer.add(circle);
+    });
+
+    stage.on("mousemove touchmove", () => {
+      if (!isDrawing) {
+        return;
+      }
+
+      const pos = stage.getPointerPosition();
+      const radius = Math.sqrt(
+        Math.pow(pos.x - circle.x(), 2) + Math.pow(pos.y - circle.y(), 2)
+      );
+
+      circle.radius(radius);
+      layer.batchDraw();
+    });
+
+    stage.on("mouseup touchend", () => {
+      isDrawing = false;
+    });
+
+    window.addEventListener("wheel", (e) => {
+      if (circle) {
+        const delta = e.deltaY;
+        const radius = circle.radius() + delta / 10;
+
+        circle.radius(Math.max(5, radius));
+        layer.batchDraw();
+
+        if (circles.length === 2) {
+          const distance = calculateDistance();
+          console.log("🚀 ~ window.addEventListener ~ distance:", distance);
+          updateDistanceText(distance);
+        }
+      }
+    });
+
+    function calculateDistance() {
+      const circle1 = circles[0];
+      const circle2 = circles[1];
+
+      const center1 = { x: circle1.x(), y: circle1.y() };
+      const center2 = { x: circle2.x(), y: circle2.y() };
+
+      const distance = Math.sqrt(
+        Math.pow(center2.x - center1.x, 2) + Math.pow(center2.y - center1.y, 2)
+      );
+
+      return distance - circle1.radius() - circle2.radius();
+    }
+
+    function updateDistanceText(distance) {
+      if (!distanceText) {
+        distanceText = new Konva.Text({
+          x: 10,
+          y: 10,
+          text: `Distance: ${distance.toFixed(2)}`,
+          fontSize: 18,
+          fill: "black",
+        });
+
+        layer.add(distanceText);
+      } else {
+        distanceText.text(`Distance: ${distance.toFixed(2)}`);
+        layer.batchDraw();
+      }
+    }
+  </script>
+</html>
